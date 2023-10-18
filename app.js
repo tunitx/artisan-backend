@@ -41,15 +41,21 @@ const verifyToken = (req, res, next) => {
 };
 
 //? for registering new user 
+const saltRounds = 10;
+
 app.post('/register', async (req, res) => {
-    console.log(res.body);
-    const saltRounds = 10;
+    console.log(req.body);
+    
     const { username, email, password } = req.body;
     const existingUser = await User.findOne({ email });
+    const existingUserName = await User.findOne({name : username});
 
     //? to check if the user has already registered 
-    if (existingUser) {
+    if (existingUser ) {
         return res.status(409).json({ message: 'User already exists' });
+    }
+    if(existingUserName){
+        return res.status(409).json({ message: 'Username already exists' });
     }
 
     //? Hashing the password to store in the db securely 

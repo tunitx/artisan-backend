@@ -1,19 +1,18 @@
 //? requiring node modules
-
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const cors = require('cors'); 
+const cors = require('cors');
 const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors()); 
+app.use(cors());
 
 //? connect to mongo db atlas 
 const mongoose = require('mongoose');
-mongoose.connect(process.env.MONGO_URL , { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Connected to MongoDB'));
@@ -25,7 +24,7 @@ const User = require('./Models/userModel');
 //! for checking on postman purposes: Header - > 
 //! Authorization : bearer 'Real_Token_Value'
 const verifyToken = (req, res, next) => {
-    const authHeader = req.headers.authorization ;
+    const authHeader = req.headers.authorization;
     if (authHeader) {
         const token = authHeader.split(' ')[1];
         jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
@@ -43,18 +42,18 @@ const verifyToken = (req, res, next) => {
 //? for registering new user 
 const saltRounds = 10;
 
-app.post('/register', async (req, res) => {
+app.post('/signup', async (req, res) => {
     console.log(req.body);
-    
+
     const { username, email, password } = req.body;
     const existingUser = await User.findOne({ email });
-    const existingUserName = await User.findOne({name : username});
+    const existingUserName = await User.findOne({ name: username });
 
     //? to check if the user has already registered 
-    if (existingUser ) {
+    if (existingUser) {
         return res.status(409).json({ message: 'User already exists' });
     }
-    if(existingUserName){
+    if (existingUserName) {
         return res.status(409).json({ message: 'Username already exists' });
     }
 
@@ -70,8 +69,8 @@ app.post('/register', async (req, res) => {
     //? Generating JWT token (to be sent to the client and be saved in browsers local storage)
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
-    res.cookie('token', token, { httpOnly: true });
-    res.status(201).json({ message: 'User created' });
+    // res.cookie('token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 10 });
+    res.status(201).json({ message: 'User created', token });
 });
 
 //? User login route 
@@ -91,7 +90,7 @@ app.post('/login', async (req, res) => {
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
     // ? Send JWT token in response
-    res.cookie('token', token, { httpOnly: true });
+    // res.cookie('token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 10 } );
     res.json({ message: 'Login successful', token });
 });
 
@@ -101,5 +100,5 @@ app.get('/protected', verifyToken, (req, res) => {
 });
 
 app.listen(process.env.PORT || 3000, () => {
-    console.log('Server is up on port : ' +  process.env.PORT || 3000);
+    console.log('Server is up on port : ' + process.env.PORT || 3000);
 });

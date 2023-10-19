@@ -16,10 +16,19 @@ console.log(process.env.CLOUDINARY_CLOUD_NAME)
 
 //? configure cloudinary
 
+// cloudinary.config({
+//     cloud_name: 'dvrko0bzr',
+//     api_key: '188551638249943',
+//     api_secret: 'aLZPOLQJ0LrahpXo6QY8tdYl7Sc',
+//     secure: true,
+// });
+
+// const cloud_name = 
+
 cloudinary.config({
-    cloud_name: 'dvrko0bzr',
-    api_key: '188551638249943',
-    api_secret: 'aLZPOLQJ0LrahpXo6QY8tdYl7Sc',
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
     secure: true,
 });
 
@@ -92,7 +101,7 @@ app.post('/signup', async (req, res) => {
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
     // res.cookie('token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 10 });
-    res.status(201).json({ message: 'User created', token });
+    res.status(201).json({ message: 'User created', token , user});
 });
 
 //? User login route 
@@ -114,7 +123,7 @@ app.post('/signin', async (req, res) => {
 
     // ? Send JWT token in response
     // res.cookie('token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 10 } );
-    res.json({ message: 'Login successful', token });
+    res.json({ message: 'Login successful', token, user });
 });
 
 //? Protected route for verifying the user's token using verifyToken function
@@ -144,9 +153,10 @@ const parser = multer({ storage });
 
 // todo : /create-userProfile route for creating khojo user profile
 
-app.post('/create-userProfile', verifyToken, parser.single('pfp'), async (req, res) => {
+app.post('/create-userProfile', parser.single('pfp'), async (req, res) => {
     // console.log(JSON.stringify(req.body));
     console.log(req.body);
+    console.log(req.user);
     const pfp = req.file.path;
    
     try {

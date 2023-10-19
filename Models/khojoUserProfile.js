@@ -22,12 +22,12 @@ const khojoProfileSchema = new mongoose.Schema({
         required: true
     },
     socialLinks: {
-        type: String, //to be converted to to an array of objects or a normal object
+        type: Map, //to be converted to to an array of objects or a normal object
         required: false
        
     },
     skills: {
-        type: String, // to be converted to array
+        type: [String], // to be converted to array
         required:false
        
     }

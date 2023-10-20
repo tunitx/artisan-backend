@@ -30,6 +30,10 @@ const khojoProfileSchema = new mongoose.Schema({
         type: [String], // to be converted to array
         required:false
        
+    },
+    User : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }
 });
 

@@ -21,8 +21,15 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
         default: false
-    }
+    },
+    khojoUserProfiles: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'KhojoProfile'
+    }]
 });
+
+
+
 
 const User = mongoose.model('User', userSchema);
 

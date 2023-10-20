@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const bodyParser = require('body-parser'); 
+const bodyParser = require('body-parser');
 dotenv.config();
 const ejs = require('ejs');
 
@@ -46,7 +46,7 @@ db.once('open', () => console.log('Connected to MongoDB'));
 
 //? requiring User model for authentication
 const User = require('./Models/userModel');
-const UserProfile = require('./Models/khojoUserProfile');
+const khojoProfile = require('./Models/khojoUserProfile');
 
 
 //? to verify token validity sent by tushar 
@@ -101,7 +101,7 @@ app.post('/signup', async (req, res) => {
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
     // res.cookie('token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 10 });
-    res.status(201).json({ message: 'User created', token , user});
+    res.status(201).json({ message: 'User created', token, user });
 });
 
 //? User login route 
@@ -153,35 +153,48 @@ const parser = multer({ storage });
 
 // todo : /create-userProfile route for creating khojo user profile
 
-app.post('/create-userProfile', parser.single('pfp'), async (req, res) => {
+app.post('/create-userProfile', verifyToken, parser.single('pfp'), async (req, res) => {
     // console.log(JSON.stringify(req.body));
     console.log(req.body);
     console.log(req.user);
-    const pfp = req.file.path;
-   
+    // const pfp = req.file.path;
+
     try {
-       
+
         //? upload profile photo to cloudinary
-       
-        const result = await cloudinary.uploader.upload(pfp);
-        const {  name, businessName, businessAddress, businessDetails, socialLinks, skills } = req.body;
-       
+
+        // const result = await cloudinary.uploader.upload(pfp);
+        const { name, businessName, businessAddress, businessDetails, socialLinks, skills } = req.body;
+
         //? create new user profile object
-        const userProfile = new UserProfile({
-            pfp: result.secure_url,
+        const userProfile = new khojoProfile({
+            // pfp: result.secure_url,
             name: name,
-            businessName : businessName,
-            businessAddress : businessAddress,
-            businessDetails : businessDetails,
-            socialLinks : socialLinks,
-            skills: skills
-            
+            businessName: businessName,
+            businessAddress: businessAddress,
+            businessDetails: businessDetails,
+            socialLinks: socialLinks,
+            skills: skills,
+
         });
+
 
         //? save user profile to database
         await userProfile.save();
+        //? push the reference of the new userProfile into the current user's khojoProfiles array
 
-        res.status(201).json({ message: 'User profile created successfully' });
+        const user = await User.findOne({ email: req.user.email });
+        console.log(userProfile._id);
+        user.khojoUserProfiles = user.khojoUserProfiles || []; // initialize khojoProfile to an empty array if it's undefined
+        user.khojoUserProfiles.push(userProfile._id);
+        // console.log(user.khojoProfile);
+        await user.save();
+
+        //Todo : /update-userProfile route for updating user profile
+        res.status(201).json({ message: 'Userprofile created', user });
+        
+
+        
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -190,7 +203,41 @@ app.post('/create-userProfile', parser.single('pfp'), async (req, res) => {
 
 //Todo : /update-userProfile route for updating user profile
 
+app.put('/update-userProfile/:id', parser.single('pfp'), async (req, res) => {
 
+    //! this id should be the id of the khojo user profile that the user wants to update
+    //! can be removed later,  not specified 
+    const { id } = req.params;
+    const { name, businessName, businessAddress, businessDetails, socialLinks, skills } = req.body;
+    const pfp = req.file.path;
+
+    try {
+        //? upload profile photo to cloudinary
+        const result = await cloudinary.uploader.upload(pfp);
+
+
+        //? find user profile by id
+        const userProfile = await khojoProfile.findById(id);
+
+        //? update user profile object
+        userProfile.pfp = result.secure_url;
+        userProfile.name = name;
+        userProfile.businessName = businessName;
+        userProfile.businessAddress = businessAddress;
+        userProfile.businessDetails = businessDetails;
+        userProfile.socialLinks = socialLinks;
+        userProfile.skills = skills;
+
+
+        //? save updated user profile to database
+        await userProfile.save();
+
+        res.status(200).json({ message: 'User profile updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 //!!: profile photo, name : name of the user, businessName : business name, businessAddress : business address, businessDetails : business details, socialLinks : social links, skills : skills 
 

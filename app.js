@@ -16,15 +16,6 @@ console.log(process.env.CLOUDINARY_CLOUD_NAME)
 
 //? configure cloudinary
 
-// cloudinary.config({
-//     cloud_name: 'dvrko0bzr',
-//     api_key: '188551638249943',
-//     api_secret: 'aLZPOLQJ0LrahpXo6QY8tdYl7Sc',
-//     secure: true,
-// });
-
-// const cloud_name = 
-
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -37,7 +28,8 @@ app.use(express.json());
 app.use(cors());
 app.use(bodyParser.json());
 
-//? connect to mongo db atlas 
+//? connect to mongo db atlas
+
 const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
@@ -45,11 +37,13 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Connected to MongoDB'));
 
 //? requiring User model for authentication
+
 const User = require('./Models/userModel');
 const khojoProfile = require('./Models/khojoUserProfile');
 
 
 //? to verify token validity sent by tushar 
+
 //! for checking on postman purposes: Header - > 
 //! Authorization : bearer 'Real_Token_Value'
 
@@ -71,6 +65,7 @@ const verifyToken = (req, res, next) => {
 };
 
 //? for registering new user 
+
 const saltRounds = 10;
 
 app.post('/signup', async (req, res) => {
@@ -81,6 +76,7 @@ app.post('/signup', async (req, res) => {
     const existingUserName = await User.findOne({ name: username });
 
     //? to check if the user has already registered 
+
     if (existingUser) {
         return res.status(409).json({ message: 'User already exists' });
     }
@@ -89,6 +85,7 @@ app.post('/signup', async (req, res) => {
     }
 
     //? Hashing the password to store in the db securely 
+
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const user = new User({
         name: username,
@@ -98,6 +95,7 @@ app.post('/signup', async (req, res) => {
     await user.save();
 
     //? Generating JWT token (to be sent to the client and be saved in browsers local storage)
+
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
     // res.cookie('token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 10 });
@@ -121,9 +119,14 @@ app.post('/signin', async (req, res) => {
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
 
+    const user_id = user._id
+        .populate('khojoUserProfiles')
+        .exec();
+
+
     // ? Send JWT token in response
     // res.cookie('token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 10 } );
-    res.json({ message: 'Login successful', token, user });
+    res.json({ message: 'Login successful', token, user, user_id });
 });
 
 //? Protected route for verifying the user's token using verifyToken function
@@ -157,44 +160,49 @@ app.post('/create-userProfile', verifyToken, parser.single('pfp'), async (req, r
     // console.log(JSON.stringify(req.body));
     console.log(req.body);
     console.log(req.user);
-    // const pfp = req.file.path;
+    const pfp = req.file.path;
 
     try {
 
         //? upload profile photo to cloudinary
 
-        // const result = await cloudinary.uploader.upload(pfp);
+        const result = await cloudinary.uploader.upload(pfp);
         const { name, businessName, businessAddress, businessDetails, socialLinks, skills } = req.body;
 
         //? create new user profile object
+
         const userProfile = new khojoProfile({
-            // pfp: result.secure_url,
+            pfp: result.secure_url,
             name: name,
             businessName: businessName,
             businessAddress: businessAddress,
             businessDetails: businessDetails,
             socialLinks: socialLinks,
             skills: skills,
+            theme: 'light',
+            User: await User.findOne({ email: req.user.email })._id
 
         });
 
 
         //? save user profile to database
+
         await userProfile.save();
+
         //? push the reference of the new userProfile into the current user's khojoProfiles array
 
         const user = await User.findOne({ email: req.user.email });
         console.log(userProfile._id);
-        user.khojoUserProfiles = user.khojoUserProfiles || []; // initialize khojoProfile to an empty array if it's undefined
+        user.khojoUserProfiles = user.khojoUserProfiles || []; //? initialize khojoProfile to an empty array if it's undefined
         user.khojoUserProfiles.push(userProfile._id);
-        // console.log(user.khojoProfile);
+
         await user.save();
 
-        //Todo : /update-userProfile route for updating user profile
-        res.status(201).json({ message: 'Userprofile created', user });
-        
+        //? populate the user object with the khojoUserProfiles array
 
-        
+        user.populate('khojoUserProfiles').execPopulate();
+        res.status(201).json({ message: 'KhojoUserprofile created', user });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Internal server error' });
@@ -213,10 +221,12 @@ app.put('/update-userProfile/:id', parser.single('pfp'), async (req, res) => {
 
     try {
         //? upload profile photo to cloudinary
+
         const result = await cloudinary.uploader.upload(pfp);
 
 
         //? find user profile by id
+
         const userProfile = await khojoProfile.findById(id);
 
         //? update user profile object
@@ -230,6 +240,7 @@ app.put('/update-userProfile/:id', parser.single('pfp'), async (req, res) => {
 
 
         //? save updated user profile to database
+
         await userProfile.save();
 
         res.status(200).json({ message: 'User profile updated successfully' });

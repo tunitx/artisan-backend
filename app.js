@@ -1,4 +1,5 @@
 //? requiring node modules
+
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -124,7 +125,7 @@ app.post('/signin', async (req, res) => {
 
     // ? Send JWT token in response
 
-    res.json({ message: 'Login successful', token, user });
+    res.json({ message: 'Login successful', token, userWithProfiles });
 });
 
 //? Protected route for verifying the user's token using verifyToken function
@@ -198,9 +199,10 @@ app.post('/create-userProfile', verifyToken, parser.single('pfp'), async (req, r
 
         //? populate the user object with the khojoUserProfiles array
 
-        const userWithProfiles = await User.findById(user._id).populate('khojoUserProfiles').exec();
-        
-        res.status(201).json({ message: 'KhojoUserprofile created', user, userProfile });
+        const userWithProfiles = await User.findById(user._id)
+             .populate('khojoUserProfiles');
+             console.log(userWithProfiles);
+             res.status(201).json({ message: 'KhojoUserprofile created', userWithProfiles });
 
     } catch (error) {
         console.error(error);

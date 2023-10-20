@@ -167,7 +167,7 @@ app.post('/create-userProfile', verifyToken, parser.single('pfp'), async (req, r
         //? upload profile photo to cloudinary
 
         const result = await cloudinary.uploader.upload(pfp);
-        const { name, businessName, businessAddress, businessDetails, socialLinks, skills } = req.body;
+        const { name, businessName, businessAddress, businessDetails, socialLinks, district } = req.body;
 
         //? create new user profile object
 
@@ -178,8 +178,8 @@ app.post('/create-userProfile', verifyToken, parser.single('pfp'), async (req, r
             businessAddress: businessAddress,
             businessDetails: businessDetails,
             socialLinks: socialLinks,
-            skills: skills,
-            theme: 'light',
+            district: district,
+            theme: req.body.theme_id,
             User: await User.findOne({ email: req.user.email })._id
 
         });

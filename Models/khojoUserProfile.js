@@ -23,7 +23,7 @@ const khojoProfileSchema = new mongoose.Schema({
     },
     socialLinks: {
         type: Map, //to be converted to to an array of objects or a normal object
-        required: false
+        required: true
        
     },
     skills: {
@@ -31,14 +31,18 @@ const khojoProfileSchema = new mongoose.Schema({
         required:false
        
     },
+    district: {
+        type: String,
+        required: true
+    },
     User : {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
     theme : {
         type: String,
-        required: false
-    }
+        required: true
+    },
 });
 
 module.exports = mongoose.model('KhojoProfile', khojoProfileSchema);

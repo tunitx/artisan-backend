@@ -33,7 +33,7 @@ const khojoProfileSchema = new mongoose.Schema({
     },
     district: {
         type: String,
-        required: true
+        required: false
     },
     User : {
         type: mongoose.Schema.Types.ObjectId,
@@ -41,7 +41,7 @@ const khojoProfileSchema = new mongoose.Schema({
     },
     theme : {
         type: String,
-        required: true
+        required: false
     },
 });
 

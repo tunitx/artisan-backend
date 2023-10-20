@@ -118,15 +118,13 @@ app.post('/signin', async (req, res) => {
     }
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET);
-
-    const user_id = user._id
-        .populate('khojoUserProfiles')
-        .exec();
-
+    
+    //? populate the user object with the khojoUserProfiles array
+    const userWithProfiles = await User.findById(user._id).populate('khojoUserProfiles').exec();
 
     // ? Send JWT token in response
-    // res.cookie('token', token, { httpOnly: true, maxAge: 1000 * 60 * 60 * 24 * 10 } );
-    res.json({ message: 'Login successful', token, user, user_id });
+
+    res.json({ message: 'Login successful', token, user });
 });
 
 //? Protected route for verifying the user's token using verifyToken function
@@ -200,8 +198,9 @@ app.post('/create-userProfile', verifyToken, parser.single('pfp'), async (req, r
 
         //? populate the user object with the khojoUserProfiles array
 
-        user.populate('khojoUserProfiles').execPopulate();
-        res.status(201).json({ message: 'KhojoUserprofile created', user });
+        const userWithProfiles = await User.findById(user._id).populate('khojoUserProfiles').exec();
+        
+        res.status(201).json({ message: 'KhojoUserprofile created', user, userProfile });
 
     } catch (error) {
         console.error(error);

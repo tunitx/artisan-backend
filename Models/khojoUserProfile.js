@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const khojoProfileSchema = new mongoose.Schema({
     pfp: {
         type: String,
-        required: false
+        required: true
     },
     name: {
         type: String,
@@ -33,7 +33,7 @@ const khojoProfileSchema = new mongoose.Schema({
     },
     district: {
         type: String,
-        required: false
+        required: true
     },
     User : {
         type: mongoose.Schema.Types.ObjectId,

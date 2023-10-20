@@ -190,13 +190,13 @@ app.post(
         businessName: businessName,
         businessAddress: businessAddress,
         businessDetails: businessDetails,
-        socialLinks: new Map ([
-            ['instagram' ,instagram]
-            ['facebook' , facebook],
-            ['twitter' , twitter],
-        ]),
+        socialLinks:{
+            'instagram': instagram,
+            'facebook': facebook,
+            'twitter': twitter
+        },
         district: district,
-        theme: req.body.theme_id,
+        theme_id: req.body.theme_id,
         User: await User.findOne({ email: req.user.email })._id,
       });
 

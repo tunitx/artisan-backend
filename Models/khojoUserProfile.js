@@ -39,9 +39,9 @@ const khojoProfileSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    theme : {
+    theme_id : {
         type: String,
-        required: false
+        required: true
     },
 });
 

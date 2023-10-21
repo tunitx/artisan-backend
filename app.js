@@ -11,7 +11,6 @@ const ejs = require("ejs");
 const db = require("./db");
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
-console.log(process.env.CLOUDINARY_CLOUD_NAME);
 
 //? configure cloudinary
 
@@ -32,20 +31,26 @@ app.use(bodyParser.json());
 const signinRouter = require("./routes/signin");
 const signupRouter = require("./routes/signup");
 const userProfileRouter = require("./routes/create-userProfile");
+const khojoUserProfileRouter = require("./routes/getAllKhojoProfiles");
+const templateByID = require("./routes/getTemplateByID");
+const getAllTemplates = require("./routes/getAllTemplates");
 
 //? using the routes
 app.use("/auth", signinRouter);
 app.use("/auth", signupRouter);
 app.use( userProfileRouter);
+app.use( khojoUserProfileRouter);
+app.use(templateByID);
+app.use(getAllTemplates);
 
 app.get('/create-userProfile', async (req, res) => {
 res.render('form.ejs');
 })
 
-// todo GET /getAllTemplates
+// GET /getAllTemplates  
+
 // todo GET /getTemplate/:id
 // todo POST /addTemplate
-// todo GET /KhojoUserProfiles
 // todo :  Schema for Templates
 
 

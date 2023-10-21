@@ -43,6 +43,10 @@ const khojoProfileSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    template : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Template'
+    }
 });
 
 module.exports = mongoose.model('KhojoProfile', khojoProfileSchema);

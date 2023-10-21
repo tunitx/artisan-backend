@@ -1,8 +1,6 @@
 //? requiring node modules
 
 const express = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
@@ -10,7 +8,6 @@ dotenv.config();
 const ejs = require("ejs");
 const db = require("./db");
 const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 //? configure cloudinary
 
@@ -38,21 +35,15 @@ const getAllTemplates = require("./routes/getAllTemplates");
 //? using the routes
 app.use("/auth", signinRouter);
 app.use("/auth", signupRouter);
-app.use( userProfileRouter);
-app.use( khojoUserProfileRouter);
+app.use(userProfileRouter);
+app.use(khojoUserProfileRouter);
 app.use(templateByID);
 app.use(getAllTemplates);
 
+//? for dummy use only 
 app.get('/create-userProfile', async (req, res) => {
-res.render('form.ejs');
+  res.render('form.ejs');
 })
-
-// GET /getAllTemplates  
-
-// todo GET /getTemplate/:id
-// todo POST /addTemplate
-// todo :  Schema for Templates
-
 
 app.listen(process.env.PORT || 3000, () => {
   console.log("Server is up on port : " + process.env.PORT || 3000);

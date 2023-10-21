@@ -4,14 +4,9 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("cloudinary").v2;
 const verifyToken = require("../utils/auth");
 const db = require("../db");
-const User = require("../Models/userModel");
 const khojoProfile = require("../Models/khojoUserProfile");
-
-
 
 router.get('/getAllKhojoProfiles', verifyToken, async (req, res) => {
     try {

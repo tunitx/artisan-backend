@@ -9,8 +9,6 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("cloudinary").v2;
 const verifyToken = require("../utils/auth");
 const db = require("../db");
-// const User = require("../Models/userModel");
-// const khojoProfile = require("../Models/khojoUserProfile");
 const Template = require("../Models/templateSchema");
 //? setup cloudinary storage
 

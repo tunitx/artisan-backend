@@ -24,7 +24,7 @@ router.post("/signin", async (req, res) => {
   
     //? populate the user object with the khojoUserProfiles array
     const userWithProfiles = await User.findById(user._id)
-      .populate("khojoUserProfiles")
+    populate({ path: "khojoUserProfiles", populate: { path: "template" } })
       .exec();
   
     // ? Send JWT token in response

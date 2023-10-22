@@ -11,12 +11,12 @@ const Template = require("../Models/templateSchema");
 //? setup cloudinary storage
 
 const storage = new CloudinaryStorage({
-    cloudinary,
-    params: {
-        folder: "user-profiles",
-        allowed_formats: ["jpg", "png", "jpeg"],
-        // transformation: [{ width: 500, height: 500, crop: 'limit' }]
-    },
+  cloudinary,
+  params: {
+    folder: "user-profiles",
+    allowed_formats: ["jpg", "png", "jpeg"],
+    // transformation: [{ width: 500, height: 500, crop: 'limit' }]
+  },
 });
 
 const parser = multer({ storage });
@@ -24,86 +24,82 @@ const parser = multer({ storage });
 // todo : /create-userProfile route for creating khojo user profile
 
 router.post(
-    "/create-userProfile",
-    verifyToken,
-    parser.single("pfp"),
-    async (req, res) => {
-        // console.log(JSON.stringify(req.body));
-        console.log(req.body);
-        console.log(req.user);
-        const pfp = req.file.path;
-        console.log(req.file);
+  "/create-userProfile",
+  verifyToken,
+  parser.single("pfp"),
+  async (req, res) => {
+    // console.log(JSON.stringify(req.body));
+    console.log(req.body);
+    console.log(req.user);
+    const pfp = req.file.path;
+    console.log(req.file);
 
-        try {
-            //? upload profile photo to cloudinary
+    try {
+      //? upload profile photo to cloudinary
 
-            const result = await cloudinary.uploader.upload(pfp);
-            const {
-                name,
-                businessName,
-                businessAddress,
-                businessDetails,
-                district,
-                instagram,
-                facebook,
-                twitter
-            } = req.body;
+      const result = await cloudinary.uploader.upload(pfp);
+      const {
+        name,
+        businessName,
+        businessAddress,
+        businessDetails,
+        district,
+        instagram,
+        facebook,
+        twitter,
+      } = req.body;
 
-            //? create new user profile object
+      //? create new user profile object
 
-            const userProfile = new khojoProfile({
-                pfp: result.secure_url,
-                name: name,
-                businessName: businessName,
-                businessAddress: businessAddress,
-                businessDetails: businessDetails,
-                socialLinks: {
-                    'instagram': instagram,
-                    'facebook': facebook,
-                    'twitter': twitter
-                },
-                district: district,
-                theme_id: req.body.theme_id,
-                // User: await User.findOne({ email: req.user.email })._id,
-                // template: await Template.findOne({ theme_id: req.body.theme_id })._id,
-            });
+      const userProfile = new khojoProfile({
+        pfp: result.secure_url,
+        name: name,
+        businessName: businessName,
+        businessAddress: businessAddress,
+        businessDetails: businessDetails,
+        socialLinks: {
+          instagram: instagram,
+          facebook: facebook,
+          twitter: twitter,
+        },
+        district: district,
+        theme_id: req.body.theme_id,
+      });
 
-            //? save user profile to database
-            // await userProfile.populate('template');
-            await userProfile.save();
+      //? save user profile to database
+      await userProfile.save();
 
-            //  await  userProfile.save();
-            const template = await Template.findOne({ theme_id: req.body.theme_id });
-            userProfile.template = template._id;
-            userProfile.populate('template');
-            await userProfile.save();
+      const template = await Template.findOne({ theme_id: req.body.theme_id });
+      userProfile.template = template._id;
+      await userProfile.save();
 
+      //? push the reference of the new userProfile into the current user's khojoProfiles array
 
-            //? push the reference of the new userProfile into the current user's khojoProfiles array
+      const user = await User.findOne({ email: req.user.email });
+      user.khojoUserProfiles = user.khojoUserProfiles || []; //? initialize khojoProfile to an empty array if it's undefined
+      user.khojoUserProfiles.push(userProfile._id);
 
-            const user = await User.findOne({ email: req.user.email });
-            console.log(userProfile._id);
-            user.khojoUserProfiles = user.khojoUserProfiles || []; //? initialize khojoProfile to an empty array if it's undefined
-            user.khojoUserProfiles.push(userProfile._id);
+      await user.save();
 
-            await user.save();
+      //? populate the user object with the khojoUserProfiles array and the khojoUserProfiles array with each template profile
 
-            //? populate the user object with the khojoUserProfiles array
+      const userWithProfiles = await User.findById(user._id).populate({
+        path: "khojoUserProfiles",
+        populate: { path: "template" },
+      })
+      .exec();
 
-            const userWithProfiles = await User.findById(user._id).populate(
-                "khojoUserProfiles"
-            );
- 
-            console.log(userWithProfiles);
-            res
-                .status(201)
-                .json({ message: "KhojoUserprofile created", userWithProfiles, userProfile });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: "Internal server error" });
-        }
+      res
+        .status(201)
+        .json({
+          message: "KhojoUserprofile created",
+          userWithProfiles,
+        });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal server error" });
     }
+  }
 );
-
 
 module.exports = router;

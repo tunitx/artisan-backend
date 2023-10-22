@@ -47,6 +47,8 @@ app.use(getAllTemplates);
 app.use(getAllUsers);
 app.use(addNewTemplate);
 
+
+
 app.use('/cloudinary', createProxyMiddleware({
   target: 'https://res.cloudinary.com',
   changeOrigin: true,

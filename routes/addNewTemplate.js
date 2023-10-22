@@ -16,39 +16,63 @@ const parser = multer({ storage });
 router.post(
   "/addNewTemplate",
   verifyToken,
-  parser.single("template"),
+  parser.fields([
+    { name: "template", maxCount: 1 },
+    { name: "preview_image", maxCount: 1 },
+  ]),
   async (req, res) => {
-    if (!req.file) {
+    if (!req.files || !req.files.template || !req.files.preview_image) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
     try {
-      cloudinary.uploader
-        .upload_stream(
-          { resource_type: "raw", folder: "Templates" },
-          async (error, result) => {
-            if (error) {
-              return res
-                .status(500)
-                .json({ error: "Error uploading to Cloudinary" });
-            }
-            console.log(result.public_id);
+      const templateFile = req.files.template[0];
+      const previewImageFile = req.files.preview_image[0];
 
-            const cloudinaryUrl = result.url;
-            const template = new Template({
-              theme_id: req.body.theme_id,
-              cloudinaryLink: cloudinaryUrl,
-            });
-
-            await template.save();
-            console.log(template);
-
-            res
-              .status(200)
-              .json({ message: "template created", cloudinaryUrl, template });
+      const templateUpload = cloudinary.uploader.upload_stream(
+        { resource_type: "raw", folder: "Templates" },
+        async (error, result) => {
+          if (error) {
+            return res
+              .status(500)
+              .json({ error: "Error uploading template to Cloudinary" });
           }
-        )
-        .end(req.file.buffer);
+          const cloudinaryUrl = result.url;
+          const previewImageUpload = cloudinary.uploader.upload_stream(
+            { folder: "PreviewImages" },
+            async (error, result) => {
+              if (error) {
+                return res
+                  .status(500)
+                  .json({
+                    error: "Error uploading preview image to Cloudinary",
+                  });
+              }
+              console.log(result);
+
+              const previewImageUrl = result.url;
+              const template = new Template({
+                theme_id: req.body.theme_id,
+                cloudinaryLink: cloudinaryUrl,
+                previewImageUrl: previewImageUrl,
+              });
+
+              await template.save();
+              console.log(template);
+
+              res.status(200).json({
+                message: "template created",
+                cloudinaryUrl,
+                previewImageUrl,
+                template,
+              });
+            }
+          );
+          previewImageUpload.end(previewImageFile.buffer);
+        }
+      );
+
+      templateUpload.end(templateFile.buffer);
     } catch (err) {
       console.log(err);
     }

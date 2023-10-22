@@ -6,6 +6,11 @@ const templateSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    previewImageUrl:{
+        type: String,
+        required: true
+    },
+    
     cloudinaryLink: {
         type: String,
         required: false

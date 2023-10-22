@@ -8,6 +8,8 @@ dotenv.config();
 const ejs = require("ejs");
 const db = require("./db");
 const cloudinary = require("cloudinary").v2;
+const { createProxyMiddleware } = require('http-proxy-middleware');
+
 
 //? configure cloudinary
 
@@ -33,6 +35,7 @@ const templateByID = require("./routes/getTemplateByID");
 const getAllTemplates = require("./routes/getAllTemplates");
 const getAllUsers = require("./routes/getAllUsers");
 const addNewTemplate = require("./routes/addNewTemplate");
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 //? using the routes
 app.use("/auth", signinRouter);
@@ -43,6 +46,13 @@ app.use(templateByID);
 app.use(getAllTemplates);
 app.use(getAllUsers);
 app.use(addNewTemplate);
+app.use('/cloudinary', createProxyMiddleware({
+  target: 'https://res.cloudinary.com',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/cloudinary': '',
+  },
+}));
 
 //? for dummy use only 
 app.get('/create-userProfile', async (req, res) => {

@@ -31,6 +31,7 @@ const userProfileRouter = require("./routes/create-userProfile");
 const khojoUserProfileRouter = require("./routes/getAllKhojoProfiles");
 const templateByID = require("./routes/getTemplateByID");
 const getAllTemplates = require("./routes/getAllTemplates");
+const getAllUsers = require("./routes/getAllUsers");
 
 //? using the routes
 app.use("/auth", signinRouter);
@@ -39,6 +40,7 @@ app.use(userProfileRouter);
 app.use(khojoUserProfileRouter);
 app.use(templateByID);
 app.use(getAllTemplates);
+app.use(getAllUsers);
 
 //? for dummy use only 
 app.get('/create-userProfile', async (req, res) => {

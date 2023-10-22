@@ -53,3 +53,4 @@ router.post('/addNewTemplate', verifyToken, parser.single('template'), async (re
     }
   });
     
+module.exports = router;

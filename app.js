@@ -8,7 +8,7 @@ dotenv.config();
 const ejs = require("ejs");
 const db = require("./db");
 const cloudinary = require("cloudinary").v2;
-const { createProxyMiddleware } = require('http-proxy-middleware');
+// const { createProxyMiddleware } = require('http-proxy-middleware');
 
 
 //? configure cloudinary
@@ -46,6 +46,7 @@ app.use(templateByID);
 app.use(getAllTemplates);
 app.use(getAllUsers);
 app.use(addNewTemplate);
+
 app.use('/cloudinary', createProxyMiddleware({
   target: 'https://res.cloudinary.com',
   changeOrigin: true,

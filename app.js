@@ -32,6 +32,7 @@ const khojoUserProfileRouter = require("./routes/getAllKhojoProfiles");
 const templateByID = require("./routes/getTemplateByID");
 const getAllTemplates = require("./routes/getAllTemplates");
 const getAllUsers = require("./routes/getAllUsers");
+const addNewTemplate = require("./routes/addNewTemplate");
 
 //? using the routes
 app.use("/auth", signinRouter);
@@ -41,10 +42,16 @@ app.use(khojoUserProfileRouter);
 app.use(templateByID);
 app.use(getAllTemplates);
 app.use(getAllUsers);
+app.use(addNewTemplate);
 
 //? for dummy use only 
 app.get('/create-userProfile', async (req, res) => {
   res.render('form.ejs');
+})
+
+//? for dummy use only
+app.get('/addNewTemplate', async (req, res) => {
+  res.render('form2.ejs');
 })
 
 app.listen(process.env.PORT || 3000, () => {

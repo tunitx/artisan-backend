@@ -13,6 +13,7 @@ const Template = require("../Models/templateSchema");
 const storage = multer.memoryStorage();
 const parser = multer({ storage });
 
+
 router.post(
   "/addNewTemplate",
   verifyToken,

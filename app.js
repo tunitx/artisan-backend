@@ -36,6 +36,7 @@ const getAllTemplates = require("./routes/getAllTemplates");
 const getAllUsers = require("./routes/getAllUsers");
 const addNewTemplate = require("./routes/addNewTemplate");
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const getKhojoUserProfileByID = require("./routes/getKhojoProfileByID");
 
 //? using the routes
 app.use("/auth", signinRouter);
@@ -46,7 +47,7 @@ app.use(templateByID);
 app.use(getAllTemplates);
 app.use(getAllUsers);
 app.use(addNewTemplate);
-
+app.use(getKhojoUserProfileByID);
 
 
 app.use('/cloudinary', createProxyMiddleware({

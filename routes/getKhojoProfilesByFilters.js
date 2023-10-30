@@ -7,11 +7,28 @@ router.get('/getKhojoProfilesByFilters', async (req, res) => {
     const [minAge, maxAge] = age;
 
     try {
-        const khojoProfiles = await KhojoUserProfile.find({
-            district: district,
-            occupation: occupation,
-            age: { $gte: minAge, $lte: maxAge }
-        }).populate('template');
+        let khojoProfiles;
+        if (district === "ALL" && occupation === "ALL") {
+            khojoProfiles = await KhojoUserProfile.find({
+                age: { $gte: minAge, $lte: maxAge }
+            }).populate('template');
+        } else if (district === "ALL") {
+            khojoProfiles = await KhojoUserProfile.find({
+                occupation: occupation,
+                age: { $gte: minAge, $lte: maxAge }
+            }).populate('template');
+        } else if (occupation === "ALL") {
+            khojoProfiles = await KhojoUserProfile.find({
+                district: district,
+                age: { $gte: minAge, $lte: maxAge }
+            }).populate('template');
+        } else {
+            khojoProfiles = await KhojoUserProfile.find({
+                district: district,
+                occupation: occupation,
+                age: { $gte: minAge, $lte: maxAge }
+            }).populate('template');
+        }
 
         res.json(khojoProfiles);
     } catch (err) {

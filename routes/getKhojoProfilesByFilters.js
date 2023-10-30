@@ -4,7 +4,11 @@ const KhojoUserProfile = require('../Models/khojoUserProfile');
 
 router.get('/getKhojoProfilesByFilters', async (req, res) => {
     const { district, age, occupation } = req.body;
-    const [minAge, maxAge] = age;
+    let minAge, maxAge;
+if (Array.isArray(age)) {
+  [minAge, maxAge] = age;
+}
+    // const [minAge, maxAge] = age;
 
     try {
         let khojoProfiles;

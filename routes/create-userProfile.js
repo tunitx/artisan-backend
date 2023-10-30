@@ -47,6 +47,8 @@ router.post(
         instagram,
         facebook,
         twitter,
+        occupation,
+        age,
       } = req.body;
 
       //? create new user profile object
@@ -62,6 +64,8 @@ router.post(
           facebook: facebook,
           twitter: twitter,
         },
+        age : age,
+        occupation: occupation,
         district: district,
         theme_id: req.body.theme_id,
       });

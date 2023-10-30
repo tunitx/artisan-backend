@@ -26,10 +26,14 @@ const khojoProfileSchema = new mongoose.Schema({
         required: true
        
     },
-    Occupation: {
+    occupation: {
         type: String , // to be converted to array
         required: true
        
+    },
+    age: {
+        type: Number,
+        required: true
     },
     district: {
         type: String,

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const KhojoUserProfile = require('../Models/khojoUserProfile');
 
-router.get('/getKhojoProfilesByFilters', async (req, res) => {
+router.post('/getKhojoProfilesByFilters', async (req, res) => {
     const { district, age, occupation } = req.body;
     let minAge, maxAge;
 if (Array.isArray(age)) {

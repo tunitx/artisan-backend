@@ -26,9 +26,9 @@ const khojoProfileSchema = new mongoose.Schema({
         required: true
        
     },
-    skills: {
-        type: [String], // to be converted to array
-        required:false
+    Occupation: {
+        type: String , // to be converted to array
+        required: true
        
     },
     district: {
